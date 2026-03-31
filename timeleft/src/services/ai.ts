@@ -1,6 +1,23 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+function getApiKey(): string {
+  // Vite client env must use import.meta.env; keep legacy fallback for compatibility.
+  const viteKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY;
+  const nodeKey = (globalThis as any)?.process?.env?.GEMINI_API_KEY;
+  return (viteKey || nodeKey || "").trim();
+}
+
+function createClient(): GoogleGenAI | null {
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+
+  try {
+    return new GoogleGenAI({ apiKey });
+  } catch (error) {
+    console.error("AI client init failed:", error);
+    return null;
+  }
+}
 
 const SYSTEM_PROMPT = `
 # Role
@@ -61,6 +78,11 @@ const SYSTEM_PROMPT = `
 `;
 
 export async function generateRelationshipComment(data: any): Promise<string> {
+  const ai = createClient();
+  if (!ai) {
+    return "時間の流れは静かに進んでいます。今、何を伝えますか？";
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -78,6 +100,11 @@ export async function generateRelationshipComment(data: any): Promise<string> {
 }
 
 export async function generateMilestoneComment(data: any): Promise<string> {
+  const ai = createClient();
+  if (!ai) {
+    return "残された時間は、あなたの選択を待っています。";
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",

@@ -1,12 +1,13 @@
 import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { CameraControls, Stars, Text, ContactShadows, Float, Environment, useTexture } from '@react-three/drei';
+import { CameraControls, Stars, Text, ContactShadows, Float, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { Relationship, Plan } from '../types';
 import { calculateRelationshipStats } from '../lib/dateUtils';
 import { generateRelationshipComment } from '../services/ai';
 import { Plus, X, Calendar, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Daisy } from './Daisy';
 
 const PLANET_RADIUS = 10;
 
@@ -172,81 +173,6 @@ function SunflowerScenery() {
   );
 }
 
-function SunflowerIsland() {
-  return (
-    <group position={[0, 0, 0]}>
-      {/* Smooth Center (Removed seeds to prevent trypophobia/feeling unwell) */}
-      <mesh receiveShadow castShadow position={[0, -0.5, 0]}>
-        <cylinderGeometry args={[PLANET_RADIUS * 0.7, PLANET_RADIUS * 0.65, 1, 64]} />
-        <meshStandardMaterial color="#1a0a04" roughness={0.8} />
-      </mesh>
-      
-      {/* G-Dragon Style Petals (Spaced out, non-overlapping, one missing) */}
-      {Array.from({ length: 8 }).map((_, i) => {
-        // Skip one petal (at the 4 o'clock position) for the iconic Peaceminusone look
-        if (i === 1) return null; 
-        
-        const angle = (Math.PI * 2 / 8) * i;
-        const radius = PLANET_RADIUS * 0.65;
-        return (
-          <group key={`giant-petal-${i}`} position={[0, -0.2, 0]} rotation={[0, -angle, 0]}>
-            <mesh position={[radius + 2.5, 0, 0]} scale={[1, 0.05, 0.45]} castShadow receiveShadow>
-              <sphereGeometry args={[3.5, 32, 16]} />
-              <meshStandardMaterial color="#ffc107" roughness={0.4} />
-            </mesh>
-          </group>
-        );
-      })}
-
-      {/* Giant Stem */}
-      <mesh receiveShadow castShadow position={[0, -12, 0]}>
-        <cylinderGeometry args={[1.5, 1.0, 24, 32]} />
-        <meshStandardMaterial color="#2e8b57" roughness={0.9} />
-      </mesh>
-
-      {/* Giant Leaves */}
-      <group position={[2, -6, 0]} rotation={[0, 0, Math.PI / 4]}>
-        <mesh scale={[1, 0.05, 0.4]} castShadow receiveShadow>
-          <sphereGeometry args={[5, 16, 16]} />
-          <meshStandardMaterial color="#218c74" roughness={0.9} />
-        </mesh>
-      </group>
-      <group position={[-1.5, -12, 0]} rotation={[0, Math.PI, Math.PI / 5]}>
-        <mesh scale={[1, 0.05, 0.4]} castShadow receiveShadow>
-          <sphereGeometry args={[6, 16, 16]} />
-          <meshStandardMaterial color="#218c74" roughness={0.9} />
-        </mesh>
-      </group>
-
-      {/* Reordered Minerals (Floating crystals/rocks around the flower) */}
-      {Array.from({ length: 25 }).map((_, i) => {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = PLANET_RADIUS * 0.7 + Math.random() * 8;
-        const y = -15 + Math.random() * 18;
-        const scale = 0.5 + Math.random() * 1.5;
-        
-        // Crystal colors
-        const colors = ['#00d2d3', '#5f27cd', '#ff9f43', '#ee5253', '#10ac84', '#c8d6e5'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        
-        return (
-          <Float key={`mineral-${i}`} speed={1 + Math.random()} rotationIntensity={2} floatIntensity={2}>
-            <mesh
-              position={[Math.cos(angle) * radius, y, Math.sin(angle) * radius]}
-              rotation={[Math.random(), Math.random(), Math.random()]}
-              scale={scale}
-              castShadow
-              receiveShadow
-            >
-              <dodecahedronGeometry args={[1]} />
-              <meshStandardMaterial color={color} roughness={0.2} metalness={0.8} emissive={color} emissiveIntensity={0.2} />
-            </mesh>
-          </Float>
-        );
-      })}
-    </group>
-  );
-}
 
 function World({ relationships, selectedId, onSelect }: { relationships: Relationship[], selectedId: string | null, onSelect: (id: string | null) => void }) {
   const controlsRef = useRef<CameraControls>(null);
@@ -292,14 +218,16 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
       <CameraControls ref={controlsRef} makeDefault minDistance={2} maxDistance={40} maxPolarAngle={Math.PI / 2 - 0.1} />
 
       <group>
-        {/* Sunflower Island */}
+        {/* Daisy Island */}
         <Suspense fallback={
           <mesh position={[0, -1, 0]} receiveShadow castShadow>
             <cylinderGeometry args={[PLANET_RADIUS, PLANET_RADIUS * 0.8, 2, 64]} />
             <meshStandardMaterial color="#5c4033" roughness={1} metalness={0} />
           </mesh>
         }>
-          <SunflowerIsland />
+          <group position={[0, -1, 0]} scale={[10, 10, 10]}>
+            <Daisy />
+          </group>
         </Suspense>
         
         <SunflowerScenery />

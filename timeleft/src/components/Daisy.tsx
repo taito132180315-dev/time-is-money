@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import * as THREE from 'three';
 
 export function Daisy() {
-  const totalFlorets = 400;
+  const totalFlorets = 600;
   const maxRadius = 0.55;
   // Golden angle for Fibonacci spiral
   const goldenAngle = Math.PI * (3 - Math.sqrt(5));
@@ -14,8 +14,8 @@ export function Daisy() {
       const r = maxRadius * Math.sqrt(i / totalFlorets);
       const x = r * Math.cos(theta);
       const z = r * Math.sin(theta);
-      // Create a slight dome shape for the center
-      const y = 0.2 + Math.sqrt(Math.max(0, maxRadius ** 2 - r ** 2)) * 0.3;
+      // Create a realistic, gentle dome shape for the center
+      const y = 0.05 + Math.sqrt(Math.max(0, maxRadius ** 2 - r ** 2)) * 0.2;
 
       // Outer florets are slightly darker/orange, inner are yellow
       const color = new THREE.Color().lerpColors(
@@ -42,7 +42,7 @@ export function Daisy() {
       const layer = i % 3;
       const tilt = (layer - 1) * 0.08;
       const yOffset = (layer - 1) * 0.02;
-      
+
       // Add slight randomness to make it look organic
       const randomTilt = (Math.random() - 0.5) * 0.04;
       const randomAngle = angle + (Math.random() - 0.5) * 0.02;
@@ -64,12 +64,6 @@ export function Daisy() {
 
   return (
     <group>
-      {/* Center Base */}
-      <mesh position={[0, 0.1, 0]}>
-        <cylinderGeometry args={[0.55, 0.55, 0.2, 32]} />
-        <meshStandardMaterial color="#FFB300" roughness={0.9} />
-      </mesh>
-
       {/* Receptacle (Green base under the flower) */}
       <mesh position={[0, -0.05, 0]} scale={[1, 0.3, 1]}>
         <sphereGeometry args={[0.6, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI]} />

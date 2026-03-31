@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { CameraControls, Stars, Text, ContactShadows, Float, Environment } from '@react-three/drei';
+import { CameraControls, Stars, Text, ContactShadows, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { Relationship, Plan } from '../types';
 import { calculateRelationshipStats } from '../lib/dateUtils';
@@ -8,19 +8,20 @@ import { generateRelationshipComment } from '../services/ai';
 import { Plus, X, Calendar, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Daisy } from './Daisy';
+import { Butterflies } from './Butterflies';
 
 const PLANET_RADIUS = 10;
 
 function getAvatarPosition(index: number) {
-  // Golden ratio spiral for even distribution on a flat disk
+  // Spread avatars outside the Daisy (petals extend ~18 world units)
   const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-  const radius = Math.sqrt(index + 1) * 1.5; // Spread out
+  const radius = 20 + Math.sqrt(index + 1) * 2;
   const angle = index * goldenAngle;
-  
+
   const px = radius * Math.cos(angle);
   const pz = radius * Math.sin(angle);
-  const py = 0; // Sit on the giant sunflower center
-  
+  const py = 0;
+
   return new THREE.Vector3(px, py, pz);
 }
 
@@ -86,93 +87,6 @@ function Avatar({ rel, index, isSelected, onClick }: { rel: Relationship, index:
   );
 }
 
-function SunflowerScenery() {
-  const { houses, clouds } = useMemo(() => {
-    const houseArr = [];
-    const cloudArr = [];
-
-    // Generate small houses
-    const houseColors = ['#ffb142', '#ff5252', '#34ace0', '#33d9b2', '#ffda79'];
-    const roofColors = ['#84817a', '#b33939', '#227093', '#218c74', '#cc8e35'];
-    
-    for (let i = 0; i < 15; i++) {
-      const radius = Math.random() * (PLANET_RADIUS * 0.6);
-      const angle = Math.random() * Math.PI * 2;
-      const x = Math.cos(angle) * radius;
-      const z = Math.sin(angle) * radius;
-      
-      const pos = new THREE.Vector3(x, 0, z);
-      const scale = 0.6 + Math.random() * 0.5;
-      const rotationY = Math.random() * Math.PI * 2;
-      const color = houseColors[Math.floor(Math.random() * houseColors.length)];
-      const roofColor = roofColors[Math.floor(Math.random() * roofColors.length)];
-      
-      houseArr.push({ id: i, pos, scale, rotationY, color, roofColor });
-    }
-
-    // Generate Clouds
-    for (let i = 0; i < 20; i++) {
-      const radius = Math.random() * (PLANET_RADIUS * 1.5);
-      const angle = Math.random() * Math.PI * 2;
-      const x = Math.cos(angle) * radius;
-      const z = Math.sin(angle) * radius;
-      const y = 5 + Math.random() * 8;
-
-      const pos = new THREE.Vector3(x, y, z);
-      const scale = 1 + Math.random() * 2;
-
-      cloudArr.push({ id: i, pos, scale });
-    }
-
-    return { houses: houseArr, clouds: cloudArr };
-  }, []);
-
-  return (
-    <group>
-      {/* Tiny Houses */}
-      {houses.map(h => (
-        <group key={`house-${h.id}`} position={h.pos} rotation={[0, h.rotationY, 0]} scale={h.scale}>
-          {/* Base */}
-          <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color={h.color} roughness={0.8} />
-          </mesh>
-          {/* Roof */}
-          <mesh position={[0, 1.25, 0]} rotation={[0, Math.PI / 4, 0]} castShadow receiveShadow>
-            <coneGeometry args={[0.9, 0.8, 4]} />
-            <meshStandardMaterial color={h.roofColor} roughness={0.9} />
-          </mesh>
-          {/* Door */}
-          <mesh position={[0, 0.3, 0.51]} castShadow>
-            <boxGeometry args={[0.3, 0.6, 0.05]} />
-            <meshStandardMaterial color="#4a3b32" roughness={0.9} />
-          </mesh>
-        </group>
-      ))}
-
-      {/* Clouds */}
-      {clouds.map(c => (
-        <group key={`cloud-${c.id}`} position={c.pos} scale={c.scale}>
-          <Float speed={1.5} rotationIntensity={0.05} floatIntensity={1}>
-            <mesh position={[0, 0, 0]} castShadow receiveShadow>
-              <sphereGeometry args={[0.7, 32, 32]} />
-              <meshStandardMaterial color="#ffffff" roughness={1} />
-            </mesh>
-            <mesh position={[0.6, -0.1, 0.2]} castShadow receiveShadow>
-              <sphereGeometry args={[0.5, 32, 32]} />
-              <meshStandardMaterial color="#ffffff" roughness={1} />
-            </mesh>
-            <mesh position={[-0.6, -0.15, -0.1]} castShadow receiveShadow>
-              <sphereGeometry args={[0.55, 32, 32]} />
-              <meshStandardMaterial color="#ffffff" roughness={1} />
-            </mesh>
-          </Float>
-        </group>
-      ))}
-    </group>
-  );
-}
-
 
 function World({ relationships, selectedId, onSelect }: { relationships: Relationship[], selectedId: string | null, onSelect: (id: string | null) => void }) {
   const controlsRef = useRef<CameraControls>(null);
@@ -184,13 +98,13 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
         const pos = getAvatarPosition(index);
         
         // Position camera slightly above and looking at the avatar
-        const camPos = pos.clone().add(new THREE.Vector3(3, 4, 3));
+        const camPos = pos.clone().add(new THREE.Vector3(8, 6, 8));
         
         controlsRef.current.setLookAt(camPos.x, camPos.y, camPos.z, pos.x, pos.y, pos.z, true);
       }
     } else if (controlsRef.current) {
-      // Reset view to look at the whole island from a slight distance
-      controlsRef.current.setLookAt(0, 12, 25, 0, 0, 0, true);
+      // Reset view to look at the whole scene from a distance
+      controlsRef.current.setLookAt(0, 30, 60, 0, 0, 0, true);
     }
   }, [selectedId, relationships]);
 
@@ -215,7 +129,7 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
       <directionalLight position={[0, -20, 20]} intensity={0.5} color="#34ace0" />
       <Environment preset="sunset" />
 
-      <CameraControls ref={controlsRef} makeDefault minDistance={2} maxDistance={40} maxPolarAngle={Math.PI / 2 - 0.1} />
+      <CameraControls ref={controlsRef} makeDefault minDistance={8} maxDistance={100} maxPolarAngle={Math.PI / 2 - 0.1} />
 
       <group>
         {/* Daisy Island */}
@@ -230,7 +144,7 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
           </group>
         </Suspense>
         
-        <SunflowerScenery />
+        <Butterflies count={5} />
 
         <group onPointerMissed={() => onSelect(null)}>
           {relationships.map((rel, i) => (

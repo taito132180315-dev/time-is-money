@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Anton", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  
+  --color-bg: #050505;
+  --color-fg: #ffffff;
+  --color-accent: #ff3300;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+* {
+  cursor: none !important;
+}
+
+.noise {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 12px; height: 12px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 100;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1), height 0.3s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s;
+  mix-blend-mode: difference;
+}
+
+.display-text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.editorial-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.perspective-container {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+input, select {
+  cursor: none !important;
+}

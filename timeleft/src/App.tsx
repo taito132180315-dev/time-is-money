@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from './hooks/useStore';
 import RelationshipMode from './components/RelationshipMode';
 import SelfMode from './components/SelfMode';
+import { getRandomQuote, type Quote } from './data/quotes';
 
 function CustomCursor() {
   const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
@@ -52,6 +53,30 @@ function CustomCursor() {
       }}
       transition={{ type: 'tween', ease: 'backOut', duration: 0.1 }}
     />
+  );
+}
+
+function DailyQuote() {
+  const [quote] = useState<Quote>(() => getRandomQuote());
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1, duration: 1, ease: [0.19, 1, 0.22, 1] }}
+      className="border-t border-white/10 px-6 md:px-12 py-10"
+    >
+      <div className="max-w-3xl mx-auto text-center">
+        <div className="text-[10px] tracking-[0.35em] text-[#ff3300]/60 uppercase mb-6">✦ &nbsp; Today's Wisdom &nbsp; ✦</div>
+        <p className="editorial-text text-xl md:text-2xl text-white/70 leading-relaxed mb-5">
+          「{quote.jp}」
+        </p>
+        <div className="w-8 h-px bg-white/20 mx-auto mb-4" />
+        <div className="text-xs text-white/30 tracking-widest">
+          {quote.name} &nbsp;·&nbsp; {quote.year}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -130,6 +155,8 @@ export default function App() {
             )}
           </AnimatePresence>
         </main>
+
+        <DailyQuote />
       </div>
     </>
   );

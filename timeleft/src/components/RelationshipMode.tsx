@@ -108,18 +108,20 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
     }
   }, [selectedId, relationships]);
 
-  useFrame((state, delta) => {
-    if (!selectedId && controlsRef.current) {
-      // Slowly rotate the camera around the island when no one is selected
-      controlsRef.current.azimuthAngle -= delta * 0.05;
+  useEffect(() => {
+    if (controlsRef.current) {
+      // Enable truck (pan) on right-click, two-finger drag on touch
+      controlsRef.current.mouseButtons.right = 2;   // ACTION.TRUCK
+      controlsRef.current.mouseButtons.middle = 2;  // middle-click also pans
+      controlsRef.current.touches.two = 768;        // two-finger: dolly + truck
     }
-  });
+  }, []);
 
   return (
     <>
       <color attach="background" args={['#1a0f14']} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0.5} fade speed={1} />
-      
+
       {/* Warm Golden Lighting */}
       <ambientLight intensity={1.5} color="#ffda79" />
       <directionalLight position={[20, 30, 20]} intensity={2} castShadow color="#ffb142">
@@ -129,7 +131,7 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
       <directionalLight position={[0, -20, 20]} intensity={0.5} color="#34ace0" />
       <Environment preset="sunset" />
 
-      <CameraControls ref={controlsRef} makeDefault minDistance={8} maxDistance={100} maxPolarAngle={Math.PI / 2 - 0.1} />
+      <CameraControls ref={controlsRef} makeDefault minDistance={5} maxDistance={200} maxPolarAngle={Math.PI / 2} />
 
       <group>
         {/* Daisy Island */}

@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { getRandomMotivationalQuote, formatQuote } from '../data/motivationalQuotes';
 
 function getApiKey(): string {
   // Vite client env must use import.meta.env; keep legacy fallback for compatibility.
@@ -80,7 +81,7 @@ const SYSTEM_PROMPT = `
 export async function generateRelationshipComment(data: any): Promise<string> {
   const ai = createClient();
   if (!ai) {
-    return "時間の流れは静かに進んでいます。今、何を伝えますか？";
+    return formatQuote(getRandomMotivationalQuote());
   }
 
   try {
@@ -92,17 +93,17 @@ export async function generateRelationshipComment(data: any): Promise<string> {
         temperature: 0.7,
       }
     });
-    return response.text || "時間の流れは静かに進んでいます。今、何を伝えますか？";
+    return response.text || formatQuote(getRandomMotivationalQuote());
   } catch (error) {
     console.error("AI Generation Error:", error);
-    return "時間の流れは静かに進んでいます。今、何を伝えますか？";
+    return formatQuote(getRandomMotivationalQuote());
   }
 }
 
 export async function generateMilestoneComment(data: any): Promise<string> {
   const ai = createClient();
   if (!ai) {
-    return "残された時間は、あなたの選択を待っています。";
+    return formatQuote(getRandomMotivationalQuote());
   }
 
   try {
@@ -114,9 +115,9 @@ export async function generateMilestoneComment(data: any): Promise<string> {
         temperature: 0.7,
       }
     });
-    return response.text || "残された時間は、あなたの選択を待っています。";
+    return response.text || formatQuote(getRandomMotivationalQuote());
   } catch (error) {
     console.error("AI Generation Error:", error);
-    return "残された時間は、あなたの選択を待っています。";
+    return formatQuote(getRandomMotivationalQuote());
   }
 }

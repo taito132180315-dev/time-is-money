@@ -4,9 +4,20 @@ export type Plan = {
   date: string;
 };
 
+export type AvatarCustomization = {
+  skinColor: string;
+  hairStyle: string;
+  hairColor: string;
+  outfitColor: string;
+  eyeColor: string;
+};
+
 export type Relationship = {
   id: string;
   name: string;
+  photo?: string;
+  gender?: 'male' | 'female';
+  avatar?: AvatarCustomization;
   meetDate: string;
   context: 'school' | 'work' | 'other';
   endDate: string;

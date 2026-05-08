@@ -1,3 +1,7 @@
 timeleft/node_modules/
 timeleft/dist/
 timeleft/.vite/
+timeleft/node_modules/.vite/
+timeleft/public/*.mp4
+timeleft/public/*.mov
+timeleft/public/*.webm

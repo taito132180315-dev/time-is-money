@@ -306,7 +306,7 @@ function Avatar({ rel, index, isSelected, onClick }: { rel: Relationship; index:
 
 // ─── World scene ──────────────────────────────────────────────────────────────
 
-function World({ relationships, selectedId, onSelect }: { relationships: Relationship[]; selectedId: string | null; onSelect: (id: string | null) => void }) {
+function World({ relationships, selectedId, onSelect, onButterflyClick }: { relationships: Relationship[]; selectedId: string | null; onSelect: (id: string | null) => void; onButterflyClick: () => void }) {
   const controlsRef = useRef<CameraControls>(null);
 
   useEffect(() => {
@@ -351,7 +351,7 @@ function World({ relationships, selectedId, onSelect }: { relationships: Relatio
         }>
           <group position={[0, -1, 0]} scale={[10, 10, 10]}><Daisy /></group>
         </Suspense>
-        <Butterflies count={5} />
+        <Butterflies count={5} onButterflyClick={onButterflyClick} />
         <group onPointerMissed={() => onSelect(null)}>
           {relationships.map((rel, i) => (
             <Avatar key={rel.id} rel={rel} index={i} isSelected={selectedId === rel.id} onClick={() => onSelect(rel.id)} />
@@ -403,6 +403,7 @@ function StyleButtons({ label, options, value, onChange }: { label: string; opti
 export default function RelationshipMode({ relationships, saveRelationships }: { relationships: Relationship[]; saveRelationships: (r: Relationship[]) => void }) {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showVideo, setShowVideo] = useState(false);
   const [formData, setFormData] = useState<Partial<Relationship>>({ context: 'other' });
   const [planData, setPlanData] = useState({ title: '', date: '' });
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
@@ -497,7 +498,7 @@ export default function RelationshipMode({ relationships, saveRelationships }: {
     <div className="relative w-full h-[70vh] md:h-[80vh] rounded-3xl overflow-hidden border border-white/10 bg-[#050505]">
       <div className="absolute inset-0 pointer-events-auto">
         <Canvas shadows camera={{ position: [0, 8, 15], fov: 45, near: 0.01, far: 1000 }}>
-          <World relationships={relationships} selectedId={selectedId} onSelect={setSelectedId} />
+          <World relationships={relationships} selectedId={selectedId} onSelect={setSelectedId} onButterflyClick={() => setShowVideo(true)} />
         </Canvas>
       </div>
 
@@ -512,6 +513,29 @@ export default function RelationshipMode({ relationships, saveRelationships }: {
           <span className="display-text text-2xl mt-1">ADD SOUL</span>
         </button>
       </div>
+
+      {/* Video modal */}
+      <AnimatePresence>
+        {showVideo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+            className="fixed inset-0 z-[9999] bg-black"
+            onClick={() => setShowVideo(false)}
+          >
+            <video
+              src="/butterfly-video.mp4"
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+              onEnded={() => setShowVideo(false)}
+              ref={(el) => { if (el) el.playbackRate = 1.75; }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Selected panel */}
       <AnimatePresence>

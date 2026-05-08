@@ -2,7 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-function Butterfly({ color, offset, scale = 1, radius = 4 }: { color: string, offset: number, scale?: number, radius?: number }) {
+function Butterfly({ color, offset, scale = 1, radius = 4, onClick }: { color: string, offset: number, scale?: number, radius?: number, onClick?: () => void }) {
   const parentRef = useRef<THREE.Group>(null);
   const flutterRef = useRef<THREE.Group>(null);
   const leftWingRef = useRef<THREE.Group>(null);
@@ -44,22 +44,39 @@ function Butterfly({ color, offset, scale = 1, radius = 4 }: { color: string, of
     }
   });
 
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    onClick?.();
+  };
+
+  const hoverProps = onClick ? {
+    onPointerEnter: (e: any) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; },
+    onPointerLeave: (e: any) => { e.stopPropagation(); document.body.style.cursor = 'auto'; },
+  } : {};
+
   return (
     <group ref={parentRef}>
+      {/* 透明な大きいヒットエリア */}
+      {onClick && (
+        <mesh onClick={handleClick} {...hoverProps}>
+          <sphereGeometry args={[1.5, 8, 8]} />
+          <meshStandardMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+      )}
       <group ref={flutterRef}>
         {/* Body — scaled uniformly, stays thin */}
-        <mesh rotation={[Math.PI / 2, 0, 0]} scale={[scale, scale, scale]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]} scale={[scale, scale, scale]} onClick={handleClick} {...hoverProps}>
           <capsuleGeometry args={[0.015, 0.15, 8, 16]} />
           <meshStandardMaterial color="#222222" roughness={0.8} />
         </mesh>
 
         {/* Right Wing */}
         <group ref={leftWingRef} position={[0.015 * scale, 0, 0]}>
-          <mesh position={[0.1 * scale, 0, 0]} scale={[scale, 0.05, 0.8 * scale]}>
+          <mesh position={[0.1 * scale, 0, 0]} scale={[scale, 0.05, 0.8 * scale]} onClick={handleClick} {...hoverProps}>
             <sphereGeometry args={[0.12, 16, 16]} />
             <meshStandardMaterial color={color} roughness={0.3} side={THREE.DoubleSide} transparent opacity={0.9} />
           </mesh>
-          <mesh position={[0.08 * scale, 0, -0.1 * scale]} scale={[scale, 0.05, 0.8 * scale]}>
+          <mesh position={[0.08 * scale, 0, -0.1 * scale]} scale={[scale, 0.05, 0.8 * scale]} onClick={handleClick} {...hoverProps}>
             <sphereGeometry args={[0.08, 16, 16]} />
             <meshStandardMaterial color={color} roughness={0.3} side={THREE.DoubleSide} transparent opacity={0.9} />
           </mesh>
@@ -67,11 +84,11 @@ function Butterfly({ color, offset, scale = 1, radius = 4 }: { color: string, of
 
         {/* Left Wing */}
         <group ref={rightWingRef} position={[-0.015 * scale, 0, 0]}>
-          <mesh position={[-0.1 * scale, 0, 0]} scale={[scale, 0.05, 0.8 * scale]}>
+          <mesh position={[-0.1 * scale, 0, 0]} scale={[scale, 0.05, 0.8 * scale]} onClick={handleClick} {...hoverProps}>
             <sphereGeometry args={[0.12, 16, 16]} />
             <meshStandardMaterial color={color} roughness={0.3} side={THREE.DoubleSide} transparent opacity={0.9} />
           </mesh>
-          <mesh position={[-0.08 * scale, 0, -0.1 * scale]} scale={[scale, 0.05, 0.8 * scale]}>
+          <mesh position={[-0.08 * scale, 0, -0.1 * scale]} scale={[scale, 0.05, 0.8 * scale]} onClick={handleClick} {...hoverProps}>
             <sphereGeometry args={[0.08, 16, 16]} />
             <meshStandardMaterial color={color} roughness={0.3} side={THREE.DoubleSide} transparent opacity={0.9} />
           </mesh>
@@ -81,7 +98,7 @@ function Butterfly({ color, offset, scale = 1, radius = 4 }: { color: string, of
   );
 }
 
-export function Butterflies({ count = 5 }) {
+export function Butterflies({ count = 5, onButterflyClick }: { count?: number; onButterflyClick?: () => void }) {
   const butterflies = useMemo(() => {
     // Magical, vibrant colors
     const colors = ['#60A5FA', '#A855F7', '#F472B6', '#34D399', '#FBBF24'];
@@ -97,7 +114,7 @@ export function Butterflies({ count = 5 }) {
   return (
     <group>
       {butterflies.map((b) => (
-        <Butterfly key={b.id} color={b.color} offset={b.offset} scale={b.scale} radius={b.radius} />
+        <Butterfly key={b.id} color={b.color} offset={b.offset} scale={b.scale} radius={b.radius} onClick={onButterflyClick} />
       ))}
     </group>
   );

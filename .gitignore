@@ -3,5 +3,6 @@ timeleft/dist/
 timeleft/.vite/
 timeleft/node_modules/.vite/
 timeleft/public/*.mp4
+!timeleft/public/butterfly-video.mp4
 timeleft/public/*.mov
 timeleft/public/*.webm

@@ -404,6 +404,11 @@ export default function RelationshipMode({ relationships, saveRelationships }: {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false);
+  const [videoLoadError, setVideoLoadError] = useState(false);
+
+  useEffect(() => {
+    if (showVideo) setVideoLoadError(false);
+  }, [showVideo]);
   const [formData, setFormData] = useState<Partial<Relationship>>({ context: 'other' });
   const [planData, setPlanData] = useState({ title: '', date: '' });
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
@@ -525,14 +530,35 @@ export default function RelationshipMode({ relationships, saveRelationships }: {
             className="fixed inset-0 z-[9999] bg-black"
             onClick={() => setShowVideo(false)}
           >
-            <video
-              src="/butterfly-video.mp4"
-              autoPlay
-              playsInline
-              className="w-full h-full object-cover"
-              onEnded={() => setShowVideo(false)}
-              ref={(el) => { if (el) el.playbackRate = 1.75; }}
-            />
+            {videoLoadError ? (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-8 text-center text-white/80 editorial-text">
+                <p>動画を読み込めませんでした。</p>
+                <p className="max-w-lg text-sm text-white/50">
+                  次のファイルを置いてから開発サーバーを再起動してください。
+                  <br />
+                  <code className="mt-2 inline-block rounded bg-white/10 px-2 py-1 text-white/90">timeleft/public/butterfly-video.mp4</code>
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setShowVideo(false); }}
+                  className="mt-4 rounded-full border border-white/30 px-6 py-2 text-white hover:bg-white/10"
+                >
+                  閉じる
+                </button>
+              </div>
+            ) : (
+              <video
+                src="/butterfly-video.mp4"
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+                onEnded={() => setShowVideo(false)}
+                onError={() => setVideoLoadError(true)}
+                ref={(el) => {
+                  if (el) el.playbackRate = 1.75;
+                }}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
